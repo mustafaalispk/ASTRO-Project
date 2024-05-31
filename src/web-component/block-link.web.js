@@ -56,7 +56,6 @@ class BlockLink extends HTMLElementBase {
 
 if (typeof window !== 'undefined') {
     if (customElements.get('block-link') === undefined) {
-        console.log("test")
         window.customElements.define('block-link', BlockLink);
     }
 }
