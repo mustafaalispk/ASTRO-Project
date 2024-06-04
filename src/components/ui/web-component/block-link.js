@@ -19,8 +19,6 @@ class BlockLink extends HTMLElementBase {
      * @type HTMLLinkElement | HTMLAnchorElement
      */
     get link() {
-        console.log("test")
-        debugger
         return (
             this.querySelector('a[data-block-link-target]') || this.querySelector('a')
         );
