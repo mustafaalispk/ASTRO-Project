@@ -3,6 +3,7 @@ const {title} = Astro.props;
 import {SITE_TITLE, SITE_DESCRIPTION} from '../constants'
 import Navbar from '../components/ui/Navbar/Navbar.astro';
 import Footer from '../components/ui/Footer/Footer.astro'
+import '../components/ui/web-component/block-link.js';
 
 interface Props {
   title?: string;
@@ -29,5 +30,6 @@ interface Props {
         <slot />
     </section>  
     <Footer />
+    <script src="../components/ui/web-component/block-link.js"></script>
 </body>
 </html>
