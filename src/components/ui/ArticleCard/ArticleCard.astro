@@ -1,6 +1,5 @@
 ---
 import {formatDate} from '../../../utils';
-import '../../ui/web-component/block-link.js';
 import type { CollectionEntry } from "astro:content";
 const {article} = Astro.props;
 
@@ -11,8 +10,8 @@ interface Props {
  
  <!-- Article Card -->
  <div class="flex max-w-md mx-auto mt-10">            
-    <block-link class="bg-white rounded-lg overflow-hidden shadow-lg cursor-pointer">
-      <a href={'/articles/' + article.slug} data-block-link-target>
+    <block-link class="bg-white rounded-lg overflow-hidden shadow-lg cursor-pointer" >
+      <a href={'/articles/' + article.slug}>
         <img
           src={'/images/' + article.data.image}
           alt="Article Image"
