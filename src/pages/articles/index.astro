@@ -1,23 +1,72 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
-import { getCollection } from "astro:content";
-import type { CollectionEntry } from "astro:content";
 import ArticleCard from '../../components/ui/ArticleCard/ArticleCard.astro';
+import { ApolloClient, InMemoryCache ,gql } from '@apollo/client/core';
+// import {GraphQLClient, gql} from 'graphql-request';
+import type { BlogPostResponse,  BlogPost } from "../../types/common";
 
-const allBlogArticles: CollectionEntry<'blog'>[] = (await getCollection('blog')).sort((a: CollectionEntry<'blog'>,b:CollectionEntry<'blog'>) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const token = import.meta.env.DATOCMS_API_KEY as string;
+const endpoint = import.meta.env.DATOCMS_API_ENDPOINT as string;
+
+const graphQLClient = new ApolloClient({ 
+    uri: endpoint, 
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  ,
+  cache: new InMemoryCache(),
+})
+
+const query = gql`{
+  allBlogposts {
+    title,
+    pubdate,
+    author,
+    slug,
+    description {
+    value},
+    heroImage {url alt}
+  }
+}`
+
+const fetchData = async (): Promise<BlogPost[]> => {
+  try {
+    const response = await graphQLClient.query<BlogPostResponse>({query});
+    return response.data.allBlogposts;
+  } catch (error) {
+    console.log(error);
+    throw new Error('Failed to fetch data');
+  }
+}
+
+const blogPosts: BlogPost[] = await fetchData();
+
+let sortedBlogArticles: BlogPost[] = [...blogPosts];
+
+sortedBlogArticles.sort((a, b) => {
+    const dateA = new Date(a.pubdate).valueOf();
+    const dateB = new Date(b.pubdate).valueOf();
+    return (
+      dateA - dateB
+    )
+  })
+
 ---
-<MainLayout>
-    <h1 class="text-2xl pb-3">All Articles</h1>
-    <!-- Main Grid -->
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">  
-     {
-      allBlogArticles.map((article) => {
-        return (
-          <ArticleCard article={article} />
-        )
-      })
-     }     
-    </div>
+<MainLayout title="All articles">
+    <div slot="allblog-articles">
+      <h1 class="text-2xl pb-3" slot="allblog-articles">All Articles</h1>
+      <!-- Main Grid -->
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">  
+      {
+        sortedBlogArticles.map((article) => {
+          return (
+            <ArticleCard article={article} />
+          )
+        })
+      }     
+      </div>
 
       <!-- Pagination -->
       <div class="flex justify-between mt-10">
@@ -25,9 +74,9 @@ const allBlogArticles: CollectionEntry<'blog'>[] = (await getCollection('blog'))
           Previous
         </a>
         <a href="#"
-         class="inline-block bg-indigo-100 px-3 py-2 hover:bg-indigo-600 hover:text-white rounded-lg">
+        class="inline-block bg-indigo-100 px-3 py-2 hover:bg-indigo-600 hover:text-white rounded-lg">
           Next
         </a>
       </div>
-
+    </div>
 </MainLayout>
