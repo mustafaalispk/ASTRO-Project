@@ -1,24 +1,67 @@
 ---
-	import MainLayout from "../layouts/MainLayout.astro";
-  import SearchForm from '../components/ui/SearchForm/SearchForm.astro';
-  import { HOMEPAGE_ARTICLE_LIMIT } from "../constants";
-  import {getCollection} from 'astro:content';
-  import type { CollectionEntry } from "astro:content";
-  import ArticleCard from "../components/ui/ArticleCard/ArticleCard.astro";
-  import MostRecentArticle from "../components/ui/MostRecentArticle/MostRecentArticle.astro";
+import MainLayout from "../layouts/MainLayout.astro";
+import { GraphQLClient, gql } from 'graphql-request';
+import type { BlogPost, BlogPostResponse } from '../types/common';
+import SearchForm from '../components/ui/SearchForm/SearchForm.astro';
+import { HOMEPAGE_ARTICLE_LIMIT } from "../constants";
+import ArticleCard from "../components/ui/ArticleCard/ArticleCard.astro";
+import MostRecentArticle from "../components/ui/MostRecentArticle/MostRecentArticle.astro";
 
+const token = import.meta.env.DATOCMS_API_KEY as string;
+const endpoint = import.meta.env.DATOCMS_API_ENDPOINT as string;
 
-  const allBlogArticles: CollectionEntry<'blog'>[] = (await getCollection('blog')).sort((a: CollectionEntry<'blog'>,b:CollectionEntry<'blog'>) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const graphQLClient = new GraphQLClient(endpoint, {
+headers: {
+  'Content-Type': 'application/json',
+  'Accept': 'application/json',
+  'Authorization': `Bearer ${token}`,
+},
+});
+
+const query = gql`
+ {
+    allBlogposts {
+      title, 
+      pubdate,
+      author,    	
+      slug,
+      description {
+      value
+      },
+      heroImage{url alt}
+    }
+  }
+`;
+const fetchData = async (): Promise<BlogPost[]> => {
+  try {
+    const res = await graphQLClient.request<BlogPostResponse>(query)
+    return res.allBlogposts;
+  } catch (error) {
+     console.log(error);
+     throw new Error('Failed to fetch data');
+  }
+}
+
+const sortedBlogArticles: BlogPost[]= await fetchData();
+
+sortedBlogArticles.sort((a, b) => {
+    const dateA = new Date(a.pubdate).valueOf();
+    const dateB = new Date(b.pubdate).valueOf();
+    return (
+      dateA - dateB
+  )
+})
   
-  const mostRecentArticle: CollectionEntry<'blog'> = allBlogArticles[0];
+  const mostRecentArticle: BlogPost = sortedBlogArticles[0];
 
-  const otherArticles: CollectionEntry<'blog'>[] = allBlogArticles.slice(1);
+  const otherArticles: BlogPost[] = sortedBlogArticles.slice(1);
 
 ---
 	<MainLayout title="Articles, Stories & Tutorials For Tech People">
+    <div slot="article-blogs">
       <!-- Top Grid -->
       <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <div>
+        <div class="flex flex-col">
           <h1 class="text-5xl font-bold mt-4 mb-8 leading-tight xl:text-6xl">
             Articles, Stories & Tutorials for Tech People
           </h1>
@@ -38,4 +81,5 @@
         })}
       </div>
     </div>
+  </div>
 </MainLayout>
