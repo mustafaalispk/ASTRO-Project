@@ -1,30 +1,31 @@
 ---
+import type { BlogPost } from '../../../types/common';
 import {formatDate} from '../../../utils';
-import type { CollectionEntry } from "astro:content";
+
 const {article} = Astro.props;
 
 interface Props {
-    article: CollectionEntry<'blog'>;
+  article: BlogPost;
 }
 ---
  
  <!-- Article Card -->
  <div class="flex max-w-md mx-auto mt-10">            
-    <block-link class="bg-white rounded-lg overflow-hidden shadow-lg cursor-pointer" >
+    <block-link class="bg-white rounded-lg overflow-hidden shadow-lg cursor-pointer">
       <a href={'/articles/' + article.slug}>
         <img
-          src={'/images/' + article.data.image}
-          alt="Article Image"
+          src={article.heroImage.url}
+          alt={article.heroImage.alt}
           class="w-full h-48 object-cover hover:opacity-75 transition duration-300 ease-in-out"
         />
       </a>
       <div class="p-6">
         <h2 class="text-2xl font-semibold mb-2 hover:underline">
-          <a href={'/articles/' + article.slug}>{article.data.title}</a>
+          <a href={'/articles/' + article.slug}>{article.title}</a>
         </h2>
-        <p class="text-gray-600 text-sm mb-4">{formatDate(article.data.pubDate)}</p>               
+        <p class="text-gray-600 text-sm mb-4">{formatDate(new Date(article.pubdate))}</p>               
       </div>
-      <div class="flex flex-wrap gap-2 pb-6 px-6">
+      <!-- <div class="flex flex-wrap gap-2 pb-6 px-6">
         {
           article.data.tags.map((tag: string, index: number) => {
             return (
@@ -34,6 +35,6 @@ interface Props {
             )
           })
         }        
-      </div>
+      </div> -->
     </block-link>            
 </div>
