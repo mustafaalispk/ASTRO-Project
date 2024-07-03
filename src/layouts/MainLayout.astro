@@ -27,7 +27,10 @@ interface Props {
   <body class="">   
     <Navbar />
     <section class="container mx-auto max-w-screen-xl my-10 px-8">
-        <slot />
+        <slot name="article-blogs" />
+        <slot name="allblog-articles"/>
+        <slot name="about-page"/>  
+        <slot />      
     </section>  
     <Footer />
     <script src="../components/ui/web-component/block-link.js"></script>
